@@ -1,6 +1,10 @@
 import { reactive, computed, watch } from 'vue'
 import { load, save, uid } from './db'
-import { monthKey, currentMonthKey, lastMonths, daysInMonth, todayISO } from '@/utils/dates'
+import {
+  lastMonths, todayISO, fromISO,
+  periodKeyOf, currentPeriodKey, periodRange, periodRangeLabel,
+  daysInPeriod, clampStartDay, shortDayLabel, longDayLabel
+} from '@/utils/dates'
 import { formatMoney } from '@/utils/format'
 import { slotColor, nextFreeSlot, OTHER_COLOR, lightMode } from '@/theme/palette'
 
@@ -9,6 +13,26 @@ const state = reactive(load())
 // Guardado automatico: cualquier mutacion del estado acaba en disco sin que
 // cada pantalla tenga que acordarse de persistir.
 watch(state, () => save(state), { deep: true, flush: 'post' })
+
+/* ------------------------------------------------------------------ */
+/* Periodos                                                            */
+/* ------------------------------------------------------------------ */
+
+/*
+ * El "mes" de la app es el periodo del usuario: si cobra el 25, va del 25 al
+ * 24. Todo lo que agrupa por mes pasa por `periodOf`, nunca por la fecha del
+ * calendario, para que baste cambiar el dia de corte en Ajustes.
+ */
+
+export const monthStartDay = computed(() => clampStartDay(state.settings.monthStartDay))
+
+/** true si el usuario no ha tocado el corte: permite ahorrar textos de rango. */
+export const usesCalendarMonth = computed(() => monthStartDay.value === 1)
+
+export const periodOf = (iso) => periodKeyOf(iso, monthStartDay.value)
+export const currentPeriod = computed(() => currentPeriodKey(monthStartDay.value))
+export const rangeOf = (key) => periodRange(key, monthStartDay.value)
+export const rangeLabelOf = (key) => periodRangeLabel(key, monthStartDay.value, state.settings.locale)
 
 /* ------------------------------------------------------------------ */
 /* Selectores                                                          */
@@ -37,7 +61,7 @@ export const sortedTransactions = computed(() =>
 )
 
 export const transactionsOfMonth = (key) =>
-  sortedTransactions.value.filter((t) => monthKey(t.date) === key)
+  sortedTransactions.value.filter((t) => periodOf(t.date) === key)
 
 export function totals (list) {
   let income = 0
@@ -71,7 +95,7 @@ export function breakdown (key, type = 'expense') {
 /** Reparto por categoria de un rango de meses (pestaña de analisis). */
 export function breakdownRange (keys, type = 'expense') {
   const set = new Set(keys)
-  const list = state.transactions.filter((t) => t.type === type && set.has(monthKey(t.date)))
+  const list = state.transactions.filter((t) => t.type === type && set.has(periodOf(t.date)))
   const sum = list.reduce((acc, t) => acc + t.amount, 0)
   const groups = new Map()
   for (const t of list) {
@@ -91,7 +115,7 @@ export function trend (endKey, count = 12) {
   const keys = lastMonths(endKey, count)
   const buckets = Object.fromEntries(keys.map((k) => [k, { key: k, income: 0, expense: 0 }]))
   for (const t of state.transactions) {
-    const b = buckets[monthKey(t.date)]
+    const b = buckets[periodOf(t.date)]
     if (!b) continue
     if (t.type === 'income') b.income += t.amount
     else b.expense += t.amount
@@ -99,22 +123,39 @@ export function trend (endKey, count = 12) {
   return keys.map((k) => ({ ...buckets[k], balance: buckets[k].income - buckets[k].expense }))
 }
 
-/** Saldo acumulado dia a dia dentro de un mes: la curva de "cuanto me queda". */
+/** Saldo acumulado dia a dia dentro del periodo: la curva de "cuanto me queda". */
 export function dailyCumulative (key) {
-  const days = daysInMonth(key)
-  const perDay = new Array(days).fill(0)
+  const cut = monthStartDay.value
+  const { start, end } = rangeOf(key)
+  const total = daysInPeriod(key, cut)
+  const perDay = new Array(total).fill(0)
+
+  // El origen se calcula una vez: dentro del bucle obligaria a rehacer el
+  // rango del periodo por cada movimiento.
+  const startDate = fromISO(start)
+  const indexOf = (iso) => Math.round((fromISO(iso) - startDate) / 86400000)
+
   for (const t of transactionsOfMonth(key)) {
-    const d = Number(t.date.slice(8, 10)) - 1
-    if (d < 0 || d >= days) continue
-    perDay[d] += t.type === 'income' ? t.amount : -t.amount
+    const i = indexOf(t.date)
+    if (i < 0 || i >= total) continue
+    perDay[i] += t.type === 'income' ? t.amount : -t.amount
   }
+
+  // El periodo en curso se dibuja solo hasta hoy: proyectar hacia delante una
+  // linea plana daria a entender que ya no vas a gastar mas.
   const today = todayISO()
-  const isCurrent = monthKey(today) === key
-  const limit = isCurrent ? Number(today.slice(8, 10)) : days
+  const limit = today >= start && today <= end ? indexOf(today) + 1 : total
+
   let acc = 0
   return perDay.slice(0, limit).map((v, i) => {
     acc += v
-    return { day: i + 1, value: acc }
+    const d = new Date(startDate)
+    d.setDate(d.getDate() + i)
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    // Solo se nombra el mes al empezar el periodo y al cambiar de mes: el resto
+    // son numeros de dia, que es como se leen los extractos.
+    const label = i === 0 || d.getDate() === 1 ? shortDayLabel(iso, state.settings.locale) : String(d.getDate())
+    return { label, tooltip: longDayLabel(iso, state.settings.locale), value: acc }
   })
 }
 
@@ -133,8 +174,8 @@ export function budgetStatus (key) {
 export const overallBalance = computed(() => totals(state.transactions).balance)
 
 export const monthsWithData = computed(() => {
-  const keys = new Set(state.transactions.map((t) => monthKey(t.date)))
-  keys.add(currentMonthKey())
+  const keys = new Set(state.transactions.map((t) => periodOf(t.date)))
+  keys.add(currentPeriod.value)
   return [...keys].sort()
 })
 

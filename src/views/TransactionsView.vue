@@ -83,9 +83,11 @@ import AddFab from '@/components/AddFab.vue'
 import { searchOutline } from 'ionicons/icons'
 import MonthSwitcher from '@/components/MonthSwitcher.vue'
 import TransactionRow from '@/components/TransactionRow.vue'
-import { money, transactionsOfMonth, totals, categoryOf, removeTransaction } from '@/store/useStore'
+import {
+  money, transactionsOfMonth, totals, categoryOf, removeTransaction, currentPeriod
+} from '@/store/useStore'
 import { openEdit } from '@/store/sheet'
-import { currentMonthKey, dayLabel } from '@/utils/dates'
+import { dayLabel } from '@/utils/dates'
 
 const FILTERS = [
   { value: 'all', label: 'Todo' },
@@ -93,7 +95,7 @@ const FILTERS = [
   { value: 'income', label: 'Ingresos' }
 ]
 
-const month = ref(currentMonthKey())
+const month = ref(currentPeriod.value)
 const filter = ref('all')
 const query = ref('')
 

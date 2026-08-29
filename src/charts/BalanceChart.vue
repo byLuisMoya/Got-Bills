@@ -11,7 +11,7 @@ import { lightMode } from '@/theme/palette'
 import { fromCents } from '@/utils/format'
 
 const props = defineProps({
-  // [{ day, value }] — saldo acumulado en centimos
+  // [{ label, tooltip, value }] — saldo acumulado en centimos
   points: { type: Array, required: true },
   height: { type: Number, default: 170 },
   formatter: { type: Function, default: (v) => String(v) },
@@ -32,7 +32,7 @@ const config = computed(() => {
   return {
     type: 'line',
     data: {
-      labels: props.points.map((p) => p.day),
+      labels: props.points.map((p) => p.label),
       datasets: [{
         data: props.points.map((p) => fromCents(p.value)),
         borderColor: hue,
@@ -62,7 +62,7 @@ const config = computed(() => {
         tooltip: {
           ...tooltipStyle(c),
           callbacks: {
-            title: (items) => `Día ${items[0].label}`,
+            title: (items) => props.points[items[0].dataIndex]?.tooltip ?? items[0].label,
             label: (ctx) => ` Saldo: ${props.formatter(Math.round(ctx.parsed.y * 100))}`
           }
         }

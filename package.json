@@ -12,7 +12,8 @@
     "icons": "capacitor-assets generate --android",
     "apk": "npm run sync && cd android && ./gradlew assembleRelease",
     "apk:debug": "npm run sync && cd android && ./gradlew assembleDebug",
-    "clean": "rm -rf dist android/app/build android/build"
+    "clean": "rm -rf dist android/app/build android/build",
+    "test": "node test/periods.test.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",

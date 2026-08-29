@@ -1,15 +1,18 @@
 <template>
   <div class="switcher">
-    <button class="switcher__nav" aria-label="Mes anterior" @click="shift(-1)">
+    <button class="switcher__nav" aria-label="Periodo anterior" @click="shift(-1)">
       <ion-icon :icon="chevronBack" />
     </button>
     <button class="switcher__current" @click="$emit('open')">
       <span class="switcher__month">{{ label }}</span>
+      <!-- Con corte distinto del dia 1 el nombre del mes no basta: se muestra
+           siempre el tramo exacto que se esta viendo. -->
+      <span v-if="rangeLabel" class="switcher__range">{{ rangeLabel }}</span>
       <ion-icon :icon="chevronDown" class="switcher__caret" />
     </button>
     <button
       class="switcher__nav"
-      aria-label="Mes siguiente"
+      aria-label="Periodo siguiente"
       :disabled="atLatest"
       @click="shift(1)"
     >
@@ -22,18 +25,20 @@
 import { computed } from 'vue'
 import { IonIcon } from '@ionic/vue'
 import { chevronBack, chevronForward, chevronDown } from 'ionicons/icons'
-import { addMonths, monthLabel, currentMonthKey } from '@/utils/dates'
+import { addMonths, monthLabel } from '@/utils/dates'
+import { currentPeriod, usesCalendarMonth, rangeLabelOf } from '@/store/useStore'
 
 const props = defineProps({ modelValue: { type: String, required: true } })
 const emit = defineEmits(['update:modelValue', 'open'])
 
 const label = computed(() => monthLabel(props.modelValue))
-// No se navega al futuro: solo confunde ver meses vacios por delante.
-const atLatest = computed(() => props.modelValue >= currentMonthKey())
+const rangeLabel = computed(() => (usesCalendarMonth.value ? '' : rangeLabelOf(props.modelValue)))
+// No se navega al futuro: solo confunde ver periodos vacios por delante.
+const atLatest = computed(() => props.modelValue >= currentPeriod.value)
 
 const shift = (d) => {
   const next = addMonths(props.modelValue, d)
-  if (d > 0 && next > currentMonthKey()) return
+  if (d > 0 && next > currentPeriod.value) return
   emit('update:modelValue', next)
 }
 </script>
@@ -54,19 +59,30 @@ const shift = (d) => {
 .switcher__nav:disabled { opacity: 0.25; }
 .switcher__nav:active:not(:disabled) { background: var(--gb-surface-2); }
 .switcher__current {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'month caret' 'range range';
   align-items: center;
-  gap: 6px;
+  gap: 0 6px;
   border: 0;
   background: transparent;
   color: var(--gb-text);
+  padding: 4px 8px;
+  border-radius: 12px;
+  min-width: 160px;
+  justify-items: center;
+}
+.switcher__month {
+  grid-area: month;
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  padding: 6px 8px;
-  border-radius: 12px;
-  min-width: 150px;
-  justify-content: center;
 }
-.switcher__caret { font-size: 14px; color: var(--gb-text-faint); }
+.switcher__range {
+  grid-area: range;
+  font-size: 11.5px;
+  color: var(--gb-text-faint);
+  margin-top: -1px;
+}
+.switcher__caret { grid-area: caret; font-size: 14px; color: var(--gb-text-faint); }
 </style>

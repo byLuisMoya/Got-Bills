@@ -151,15 +151,14 @@ import BalanceChart from '@/charts/BalanceChart.vue'
 import { OTHER_COLOR, lightMode } from '@/theme/palette'
 import {
   state, money, catColor, monthTotals, breakdown, dailyCumulative,
-  budgetStatus, transactionsOfMonth, monthsWithData, removeTransaction
+  budgetStatus, transactionsOfMonth, monthsWithData, removeTransaction,
+  currentPeriod, rangeOf
 } from '@/store/useStore'
 import { openNew, openEdit } from '@/store/sheet'
-import {
-  currentMonthKey, monthLabel, addMonths, monthRange, todayISO, monthKey
-} from '@/utils/dates'
+import { monthLabel, addMonths, todayISO } from '@/utils/dates'
 import { formatPercent, fromCents } from '@/utils/format'
 
-const month = ref(currentMonthKey())
+const month = ref(currentPeriod.value)
 const strip = ref(false)
 const settings = state.settings
 
@@ -173,9 +172,9 @@ const cumulative = computed(() => dailyCumulative(month.value))
 const budgets = computed(() => budgetStatus(month.value))
 const latest = computed(() => transactionsOfMonth(month.value).slice(0, 5))
 
-/** Al añadir desde un mes pasado, la fecha por defecto es de ese mes. */
+/** Al añadir desde un periodo pasado, la fecha por defecto cae dentro de el. */
 const defaultDate = computed(() =>
-  month.value === currentMonthKey() ? todayISO() : monthRange(month.value).start
+  month.value === currentPeriod.value ? todayISO() : rangeOf(month.value).start
 )
 
 const perDay = computed(() => {

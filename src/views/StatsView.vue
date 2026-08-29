@@ -106,8 +106,8 @@ import { statsChartOutline } from 'ionicons/icons'
 import TrendChart from '@/charts/TrendChart.vue'
 import BalanceChart from '@/charts/BalanceChart.vue'
 import RankedBars from '@/components/RankedBars.vue'
-import { money, trend, breakdownRange, catColor } from '@/store/useStore'
-import { currentMonthKey, monthLabel, lastMonths } from '@/utils/dates'
+import { money, trend, breakdownRange, catColor, currentPeriod } from '@/store/useStore'
+import { monthLabel, lastMonths } from '@/utils/dates'
 import { formatPercent } from '@/utils/format'
 
 const RANGES = [
@@ -119,7 +119,7 @@ const RANGES = [
 const range = ref(6)
 const rangeLabel = computed(() => RANGES.find((r) => r.value === range.value).label)
 
-const series = computed(() => trend(currentMonthKey(), range.value))
+const series = computed(() => trend(currentPeriod.value, range.value))
 const hasData = computed(() => series.value.some((s) => s.income || s.expense))
 
 const sum = computed(() =>
@@ -140,19 +140,23 @@ const avgExpense = computed(() => Math.round(sum.value.expense / activeMonths.va
 const avgIncome = computed(() => Math.round(sum.value.income / activeMonths.value))
 
 const ranked = computed(() => [...series.value].sort((a, b) => b.balance - a.balance))
-const best = computed(() => ranked.value[0] ?? { key: currentMonthKey(), balance: 0 })
-const worst = computed(() => ranked.value.at(-1) ?? { key: currentMonthKey(), balance: 0 })
+const best = computed(() => ranked.value[0] ?? { key: currentPeriod.value, balance: 0 })
+const worst = computed(() => ranked.value.at(-1) ?? { key: currentPeriod.value, balance: 0 })
 
 const cumulative = computed(() => {
   let acc = 0
   return series.value.map((s) => {
     acc += s.balance
-    return { day: monthLabel(s.key, 'es-ES', 'short').split(' ')[0], value: acc }
+    return {
+      label: monthLabel(s.key, 'es-ES', 'short').split(' ')[0],
+      tooltip: monthLabel(s.key),
+      value: acc
+    }
   })
 })
 
 const topRows = computed(() =>
-  breakdownRange(lastMonths(currentMonthKey(), range.value), 'expense')
+  breakdownRange(lastMonths(currentPeriod.value, range.value), 'expense')
     .slice(0, 8)
     .map((r) => ({
       key: r.category.id || 'none',

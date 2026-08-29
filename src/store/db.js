@@ -10,8 +10,8 @@ const SCHEMA = 1
 export const DEFAULT_SETTINGS = {
   currency: 'EUR',
   locale: 'es-ES',
-  theme: 'auto',       // auto | light | dark
-  firstDayOfMonth: 1,  // por si tu mes financiero no empieza el dia 1
+  theme: 'auto',      // auto | light | dark
+  monthStartDay: 1,   // dia en que empieza tu mes (1..28), p.ej. el de la nomina
   hideAmounts: false
 }
 
@@ -72,8 +72,17 @@ function migrate (data) {
     categories: Array.isArray(data.categories) && data.categories.length
       ? data.categories.map((c, i) => normalizeCategory(c, i)).filter(Boolean)
       : base.categories,
-    settings: { ...base.settings, ...(data.settings || {}) }
+    settings: normalizeSettings(base.settings, data.settings)
   }
+}
+
+function normalizeSettings (base, incoming = {}) {
+  const s = { ...base, ...incoming }
+  // `firstDayOfMonth` es el nombre que tenia el ajuste antes de usarse.
+  const raw = incoming.monthStartDay ?? incoming.firstDayOfMonth ?? base.monthStartDay
+  s.monthStartDay = Math.min(28, Math.max(1, Math.round(Number(raw) || 1)))
+  delete s.firstDayOfMonth
+  return s
 }
 
 function normalizeTx (t) {

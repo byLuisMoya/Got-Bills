@@ -11,6 +11,27 @@ internet**: todo vive en el `localStorage` del WebView, dentro del móvil.
 |---|---|---|
 | Balance del mes, saldo día a día, donut de categorías con su tabla, presupuestos | Ingresos vs gastos por mes, ahorro acumulado, medias y mejor/peor mes | Importe, tipo, categoría, fecha y nota en una pantalla |
 
+## Tu mes no es el del calendario
+
+En **Ajustes → Tu mes** eliges el día en que empieza tu mes (1–28). Si cobras el
+25, tu mes va del 25 al 24, y **todo** se recalcula sobre ese tramo: balance,
+donut, tendencias, presupuestos y la lista de movimientos.
+
+El periodo se nombra por el mes que aporta más días: con corte el 25, el tramo
+`25 ago – 24 sep` es **septiembre**; con corte el 5, `5 ago – 4 sep` es **agosto**.
+La cabecera muestra siempre el rango exacto debajo del nombre, así que no hay
+que adivinarlo.
+
+Cambiar el día no toca ningún movimiento: sólo cambia cómo se agrupan, y se
+puede volver atrás cuando quieras.
+
+Internamente un periodo se sigue identificando con una clave `YYYY-MM`, así que
+toda la aritmética de meses (anterior, siguiente, últimos 12) vale igual; lo
+único que cambia es qué fechas caen dentro. `npm test` comprueba esa aritmética
+para varios días de corte y dos años: que toda fecha del rango vuelva a su
+periodo, que los tramos encadenen sin huecos ni solapes y que las longitudes
+cuadren incluso en los meses con cambio de hora.
+
 ## Stack
 
 - **Vue 3** (`<script setup>`) + **Ionic 8** para los componentes móviles
@@ -45,7 +66,13 @@ Dos decisiones que explican casi todo el código:
 - **Las categorías guardan un índice de paleta, no un hex.** Así el mismo color
   se re-escalona al pasar de tema oscuro a claro en vez de quedarse apagado, y
   los ocho colores están validados: separación bajo daltonismo (ΔE ≥ 8 en OKLab)
-  y contraste contra las dos superficies reales de la app.
+  entre huecos contiguos, y contraste contra las dos superficies reales de la app.
+
+  Con ocho colores en juego, dos categorías cualesquiera pueden acabar pegadas
+  en el donut y no todos los pares aguantan una deuteranopía severa. Por eso el
+  donut nunca es el único canal: lleva un hueco de 2 px entre porciones, un
+  tooltip con el nombre, y justo debajo la tabla completa con nombre, importe y
+  porcentaje en el mismo orden que el anillo.
 
 ## Requisitos para compilar
 
@@ -74,6 +101,7 @@ npm run dev        # la app en el navegador, con recarga en caliente
 npm run apk        # build web + sync + APK de release firmada
 npm run apk:debug  # APK de depuración
 npm run icons      # regenera iconos y splash desde assets/*.png
+npm test           # comprueba la aritmética de periodos
 ```
 
 La APK sale en `android/app/build/outputs/apk/release/app-release.apk`.

@@ -39,6 +39,42 @@
           </ion-item>
         </section>
 
+        <section class="card">
+          <h2 class="card__title">Tu mes</h2>
+          <p class="card__sub">
+            Si cobras a mitad de mes, ponlo aquí: los totales, las gráficas y los
+            presupuestos se calculan sobre tu mes, no sobre el del calendario.
+          </p>
+
+          <ion-item lines="none" class="opt opt--flush">
+            <ion-label>El mes empieza el día</ion-label>
+            <ion-select
+              v-model="settings.monthStartDay"
+              slot="end"
+              interface="popover"
+              :interface-options="{ cssClass: 'day-popover' }"
+            >
+              <ion-select-option v-for="d in 28" :key="d" :value="d">{{ d }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <p class="period">
+            <ion-icon :icon="calendarOutline" />
+            <span>
+              <template v-if="usesCalendarMonth">
+                Mes natural, del 1 al último día.
+              </template>
+              <template v-else>
+                Tu mes en curso va del <strong>{{ currentRange }}</strong> y se llama
+                <strong>{{ currentName }}</strong>.
+              </template>
+            </span>
+          </p>
+          <p class="hint">
+            Cambiarlo no toca ningún movimiento: solo cambia cómo se agrupan.
+          </p>
+        </section>
+
         <section class="card card--flush">
           <h2 class="card__title" style="padding: 0 18px">Datos</h2>
           <ion-list style="background: transparent">
@@ -118,11 +154,13 @@ import {
 } from '@ionic/vue'
 import {
   pricetagsOutline, cloudDownloadOutline, cloudUploadOutline, trashOutline,
-  gridOutline, chevronForward
+  gridOutline, chevronForward, calendarOutline
 } from 'ionicons/icons'
 import {
-  state, categoriesById, monthsWithData, clearTransactions, replaceAll
+  state, categoriesById, monthsWithData, clearTransactions, replaceAll,
+  currentPeriod, usesCalendarMonth, rangeLabelOf
 } from '@/store/useStore'
+import { monthLabel } from '@/utils/dates'
 import { exportJSON, parseImport } from '@/store/db'
 import { saveAndShare, backupName, toCSV, readFile } from '@/utils/backup'
 
@@ -146,6 +184,8 @@ const txCount = computed(() => state.transactions.length)
 const categoryCount = computed(() => state.categories.length)
 const budgetCount = computed(() => state.categories.filter((c) => c.budget).length)
 const months = computed(() => monthsWithData.value.length)
+const currentRange = computed(() => rangeLabelOf(currentPeriod.value))
+const currentName = computed(() => monthLabel(currentPeriod.value).toLowerCase())
 
 const toast = async (message, color = 'success') => {
   const t = await toastController.create({ message, duration: 2600, color, position: 'bottom' })
@@ -238,6 +278,22 @@ ion-segment-button {
 .opt ion-icon[slot='start'] { color: var(--gb-text-dim); font-size: 20px; margin-right: 14px; }
 .opt--danger h3 { color: var(--ion-color-danger); }
 .chev { color: var(--gb-text-faint); font-size: 16px; }
+
+.opt--flush { --padding-start: 0; --inner-padding-end: 0; }
+.period {
+  display: flex;
+  gap: 9px;
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--gb-radius-sm);
+  background: var(--gb-surface-2);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--gb-text-dim);
+}
+.period ion-icon { font-size: 17px; flex: 0 0 auto; margin-top: 1px; color: var(--gb-accent); }
+.period strong { color: var(--gb-text); font-weight: 600; }
+.hint { margin: 8px 2px 0; font-size: 12px; color: var(--gb-text-faint); line-height: 1.45; }
 
 .about p { font-size: 13px; line-height: 1.55; color: var(--gb-text-dim); margin: 10px 0 0; }
 .about__stats { color: var(--gb-text-faint) !important; font-size: 12px !important; }
