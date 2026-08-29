@@ -4,8 +4,14 @@ App Android para llevar gastos e ingresos **en local**, con los gráficos que el
 banco no te da: reparto por categorías, evolución mes a mes, saldo acumulado del
 mes y presupuestos.
 
-No hay servidor, ni cuentas, ni analítica. La APK **no pide el permiso de
-internet**: todo vive en el `localStorage` del WebView, dentro del móvil.
+No hay servidor, ni cuentas, ni analítica: todo vive en el `localStorage` del
+WebView, dentro del móvil.
+
+La app pide **un solo permiso de red** (`INTERNET`) y para una sola cosa:
+preguntarle a la API pública de GitHub si hay una versión nueva. Es un `GET` sin
+cuerpo ni cookies, se hace como mucho una vez al día, y se apaga desde
+**Ajustes → Avisarme de versiones nuevas**. Ni los movimientos ni los ajustes se
+envían a ningún sitio.
 
 | Resumen | Análisis | Alta rápida |
 |---|---|---|
@@ -121,6 +127,34 @@ carpeta fuera del proyecto.
 Si clonas el repo sin el keystore, Gradle firma el release con la clave de
 depuración para que el build no falle: sirve para probar, no para actualizar una
 instalación existente.
+
+## Aviso de versión nueva
+
+Al abrir la app (y desde el botón de Ajustes) se consulta
+`api.github.com/repos/byLuisMoya/Got-Bills/releases/latest`. Si el tag publicado
+es mayor que la versión instalada, sale un aviso con un botón que abre la página
+de descarga **en el navegador del sistema**: la APK se instala encima y los datos
+se mantienen, porque va firmada con la misma clave.
+
+Si no hay red, la consulta falla en silencio — es un extra, no algo que la app
+necesite. Un "Ahora no" se recuerda para esa versión concreta y no vuelve a
+molestar hasta la siguiente.
+
+El comparador es numérico, no alfabético: `1.10.0` es mayor que `1.9.3`. Hay
+test (`npm test`).
+
+## Publicar una versión nueva
+
+La versión vive **sólo en `package.json`**; Gradle la lee de ahí y deriva el
+`versionCode` (`major*10000 + minor*100 + patch`). Duplicarla en el
+`build.gradle` acabaría publicando una release cuyo aviso no coincide con la APK.
+
+```bash
+npm version minor --no-git-tag-version   # o major / patch
+npm run apk
+gh release create v$(node -p "require('./package.json').version") \
+  android/app/build/outputs/apk/release/app-release.apk
+```
 
 ## Copias de seguridad
 

@@ -33,6 +33,14 @@
         </provider>
     </application>
 
-    <!-- Sin permisos. La app no accede a la red: el WebView carga los assets
-         locales a traves del asset loader de Capacitor, y no hay backend. -->
+    <!--
+      Unico permiso de red, y para una sola cosa: preguntarle a la API publica
+      de GitHub si hay una version nueva (Ajustes > Avisarme de versiones
+      nuevas, se puede desactivar). Es un GET sin cuerpo ni cookies.
+
+      No hay backend: la app no envia movimientos, ajustes ni identificadores a
+      ningun sitio, y la interfaz se sirve de los assets locales a traves del
+      asset loader de Capacitor.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

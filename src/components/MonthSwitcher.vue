@@ -63,11 +63,11 @@ const shift = (d) => {
   grid-template-columns: 1fr auto;
   grid-template-areas: 'month caret' 'range range';
   align-items: center;
-  gap: 0 6px;
+  gap: 4px 6px;
   border: 0;
   background: transparent;
   color: var(--gb-text);
-  padding: 4px 8px;
+  padding: 5px 8px 7px;
   border-radius: 12px;
   min-width: 160px;
   justify-items: center;
@@ -77,12 +77,13 @@ const shift = (d) => {
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 .switcher__range {
   grid-area: range;
   font-size: 11.5px;
   color: var(--gb-text-faint);
-  margin-top: -1px;
+  line-height: 1;
 }
 .switcher__caret { grid-area: caret; font-size: 14px; color: var(--gb-text-faint); }
 </style>

@@ -40,3 +40,15 @@ export function formatPercent (ratio, locale = 'es-ES') {
     maximumFractionDigits: ratio !== 0 && Math.abs(ratio) < 0.1 ? 1 : 0
   }).format(ratio)
 }
+
+/**
+ * Normaliza texto para buscar: minusculas y sin tildes ni dieresis.
+ * Nadie escribe «nómina» con tilde en un buscador, y «Nomina» tiene que
+ * encontrarla igual. NFD separa la letra de su acento y el rango U+0300-036F
+ * son justo esos acentos sueltos.
+ */
+export const foldText = (value) =>
+  String(value ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')

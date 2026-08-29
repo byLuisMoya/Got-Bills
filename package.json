@@ -1,6 +1,6 @@
 {
   "name": "got-bills",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Control local de gastos e ingresos con graficos claros. 100% offline.",
@@ -13,7 +13,7 @@
     "apk": "npm run sync && cd android && ./gradlew assembleRelease",
     "apk:debug": "npm run sync && cd android && ./gradlew assembleDebug",
     "clean": "rm -rf dist android/app/build android/build",
-    "test": "node test/periods.test.mjs"
+    "test": "node test/periods.test.mjs && node test/versions.test.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",

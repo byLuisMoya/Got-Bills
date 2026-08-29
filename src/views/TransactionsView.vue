@@ -88,6 +88,7 @@ import {
 } from '@/store/useStore'
 import { openEdit } from '@/store/sheet'
 import { dayLabel } from '@/utils/dates'
+import { foldText } from '@/utils/format'
 
 const FILTERS = [
   { value: 'all', label: 'Todo' },
@@ -100,11 +101,11 @@ const filter = ref('all')
 const query = ref('')
 
 const visible = computed(() => {
-  const q = query.value.trim().toLowerCase()
+  const q = foldText(query.value.trim())
   return transactionsOfMonth(month.value).filter((t) => {
     if (filter.value !== 'all' && t.type !== filter.value) return false
     if (!q) return true
-    return t.note.toLowerCase().includes(q) || categoryOf(t).name.toLowerCase().includes(q)
+    return foldText(t.note).includes(q) || foldText(categoryOf(t).name).includes(q)
   })
 })
 

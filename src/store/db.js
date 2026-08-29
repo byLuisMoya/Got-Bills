@@ -12,7 +12,10 @@ export const DEFAULT_SETTINGS = {
   locale: 'es-ES',
   theme: 'auto',      // auto | light | dark
   monthStartDay: 1,   // dia en que empieza tu mes (1..28), p.ej. el de la nomina
-  hideAmounts: false
+  hideAmounts: false,
+  updateCheck: true,  // avisar cuando haya una version nueva en GitHub
+  lastUpdateCheck: 0, // marca de la ultima consulta que salio bien
+  skippedVersion: ''  // version a la que el usuario dijo "ahora no"
 }
 
 const seedCategories = () => [

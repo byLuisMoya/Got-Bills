@@ -30,6 +30,8 @@
               v-model="settings.currency"
               slot="end"
               interface="action-sheet"
+              cancel-text="Cancelar"
+              ok-text="Aceptar"
               :interface-options="{ header: 'Moneda' }"
             >
               <ion-select-option v-for="c in CURRENCIES" :key="c.code" :value="c.code">
@@ -52,6 +54,8 @@
               v-model="settings.monthStartDay"
               slot="end"
               interface="popover"
+              cancel-text="Cancelar"
+              ok-text="Aceptar"
               :interface-options="{ cssClass: 'day-popover' }"
             >
               <ion-select-option v-for="d in 28" :key="d" :value="d">{{ d }}</ion-select-option>
@@ -123,13 +127,36 @@
 
         <section class="card about">
           <h2 class="card__title">Got Bills {{ version }}</h2>
+
+          <ion-item lines="none" class="opt opt--flush">
+            <ion-label>
+              <h3>Avisarme de versiones nuevas</h3>
+              <p>Consulta GitHub una vez al día. No envía ningún dato tuyo.</p>
+            </ion-label>
+            <ion-toggle v-model="settings.updateCheck" slot="end" />
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            class="update-btn"
+            :disabled="checking"
+            @click="checkNow"
+          >
+            <ion-spinner v-if="checking" slot="start" name="crescent" />
+            <ion-icon v-else slot="start" :icon="refreshOutline" />
+            {{ checking ? 'Comprobando…' : 'Buscar actualizaciones' }}
+          </ion-button>
+
           <p>
-            Tus movimientos se guardan únicamente en este dispositivo. La app no
-            tiene servidor, ni cuentas, ni permiso de internet: si la desinstalas
-            sin exportar antes, los datos se van con ella.
+            Tus movimientos se guardan únicamente en este dispositivo: la app no
+            tiene servidor ni cuentas. Lo único que sale a la red es la consulta
+            a GitHub de aquí arriba, y puedes apagarla. Si desinstalas la app sin
+            exportar antes, los datos se van con ella.
           </p>
           <p class="about__stats num">
-            {{ txCount }} movimientos guardados · {{ months }} meses con datos
+            {{ txCount }} {{ plural(txCount, 'movimiento', 'movimientos') }} ·
+            {{ months }} {{ plural(months, 'mes', 'meses') }} con datos
           </p>
         </section>
       </div>
@@ -150,11 +177,11 @@ import { ref, computed } from 'vue'
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem,
   IonLabel, IonIcon, IonToggle, IonSegment, IonSegmentButton, IonSelect,
-  IonSelectOption, alertController, toastController
+  IonSelectOption, IonSpinner, alertController, toastController
 } from '@ionic/vue'
 import {
   pricetagsOutline, cloudDownloadOutline, cloudUploadOutline, trashOutline,
-  gridOutline, chevronForward, calendarOutline
+  gridOutline, chevronForward, calendarOutline, refreshOutline
 } from 'ionicons/icons'
 import {
   state, categoriesById, monthsWithData, clearTransactions, replaceAll,
@@ -163,6 +190,7 @@ import {
 import { monthLabel } from '@/utils/dates'
 import { exportJSON, parseImport } from '@/store/db'
 import { saveAndShare, backupName, toCSV, readFile } from '@/utils/backup'
+import { checkForUpdate, openDownloadPage, RELEASES_URL } from '@/utils/updates'
 
 const CURRENCIES = [
   { code: 'EUR', label: 'Euro (€)' },
@@ -179,6 +207,7 @@ const CURRENCIES = [
 const version = __APP_VERSION__
 const settings = state.settings
 const fileEl = ref(null)
+const checking = ref(false)
 
 const txCount = computed(() => state.transactions.length)
 const categoryCount = computed(() => state.categories.length)
@@ -186,6 +215,7 @@ const budgetCount = computed(() => state.categories.filter((c) => c.budget).leng
 const months = computed(() => monthsWithData.value.length)
 const currentRange = computed(() => rangeLabelOf(currentPeriod.value))
 const currentName = computed(() => monthLabel(currentPeriod.value).toLowerCase())
+const plural = (n, one, many) => (n === 1 ? one : many)
 
 const toast = async (message, color = 'success') => {
   const t = await toastController.create({ message, duration: 2600, color, position: 'bottom' })
@@ -207,6 +237,32 @@ const exportCsv = async () => {
     await toast(res.shared ? 'CSV exportado' : `Guardado en ${res.path}`)
   } catch (err) {
     await toast(`No se pudo exportar: ${err.message}`, 'danger')
+  }
+}
+
+/** Comprobacion manual: ignora el limite diario y siempre dice algo. */
+const checkNow = async () => {
+  checking.value = true
+  try {
+    const release = await checkForUpdate(settings, { force: true })
+    if (!release) {
+      await toast(`Ya tienes la última versión (${version})`)
+      return
+    }
+    const alert = await alertController.create({
+      header: 'Hay una versión nueva',
+      subHeader: `Got Bills ${release.version}`,
+      message: 'Se abrirá la página de descarga en el navegador. Instálala encima: tus movimientos se mantienen.',
+      buttons: [
+        { text: 'Ahora no', role: 'cancel' },
+        { text: 'Descargar', handler: () => openDownloadPage(release.url) }
+      ]
+    })
+    await alert.present()
+  } catch {
+    await toast('No se pudo comprobar. ¿Tienes conexión?', 'danger')
+  } finally {
+    checking.value = false
   }
 }
 
@@ -294,6 +350,9 @@ ion-segment-button {
 .period ion-icon { font-size: 17px; flex: 0 0 auto; margin-top: 1px; color: var(--gb-accent); }
 .period strong { color: var(--gb-text); font-weight: 600; }
 .hint { margin: 8px 2px 0; font-size: 12px; color: var(--gb-text-faint); line-height: 1.45; }
+
+.update-btn { margin-top: 14px; --border-color: var(--gb-line-strong); --color: var(--gb-text); text-transform: none; }
+.update-btn ion-spinner { width: 18px; height: 18px; margin-right: 8px; }
 
 .about p { font-size: 13px; line-height: 1.55; color: var(--gb-text-dim); margin: 10px 0 0; }
 .about__stats { color: var(--gb-text-faint) !important; font-size: 12px !important; }

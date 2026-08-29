@@ -103,3 +103,54 @@ ion-content { --background: var(--gb-bg); }
 ion-modal { --border-radius: 24px 24px 0 0; }
 ion-tab-bar { border-top: 1px solid var(--gb-line); }
 ion-toolbar { --border-width: 0 !important; }
+
+/* --- Overlays de Ionic -------------------------------------------------
+   Calendario, selectores, alertas y avisos se pintan fuera del arbol de la
+   pagina, asi que no heredan nada: hay que darles la superficie a mano.     */
+
+ion-datetime {
+  --background: var(--gb-surface);
+  --background-rgb: var(--gb-surface-rgb);
+  --title-color: var(--gb-text);
+  --wheel-highlight-background: var(--gb-surface-2);
+  --wheel-fade-background-rgb: var(--gb-surface-rgb);
+  color: var(--gb-text);
+  border-radius: var(--gb-radius);
+}
+/* El dia de hoy y el seleccionado son los dos unicos que llevan color. */
+ion-datetime::part(calendar-day) { color: var(--gb-text-dim); }
+ion-datetime::part(calendar-day today) { color: var(--gb-accent); }
+ion-datetime::part(calendar-day active),
+ion-datetime::part(calendar-day active today) {
+  background: var(--gb-accent);
+  color: var(--gb-on-accent);
+}
+ion-datetime::part(calendar-day disabled) { color: var(--gb-text-faint); opacity: 0.4; }
+
+ion-action-sheet, ion-alert, ion-popover, ion-picker {
+  --background: var(--gb-surface);
+  --color: var(--gb-text);
+}
+ion-action-sheet {
+  --button-background: var(--gb-surface);
+  --button-background-selected: var(--gb-surface-2);
+  --button-color: var(--gb-text);
+}
+ion-alert {
+  --backdrop-opacity: 0.6;
+}
+.alert-wrapper, .action-sheet-group, .popover-content {
+  background: var(--gb-surface) !important;
+  color: var(--gb-text);
+}
+.alert-title, .action-sheet-title { color: var(--gb-text) !important; }
+.alert-message, .alert-sub-title { color: var(--gb-text-dim) !important; }
+.action-sheet-button, .action-sheet-button.ion-activated { color: var(--gb-text) !important; }
+.select-interface-option ion-label { color: var(--gb-text) !important; }
+.select-interface-option.item-radio-checked ion-label { color: var(--gb-accent) !important; font-weight: 600; }
+
+ion-toast {
+  --background: var(--gb-surface-2);
+  --color: var(--gb-text);
+  --border-radius: 14px;
+}
