@@ -1,0 +1,93 @@
+/* Paleta propia sobre las variables de Ionic. Diseño "dark-first": es una app
+   que se abre de noche en el sofá para apuntar un gasto. */
+
+:root {
+  --gb-bg: #0b1020;
+  --gb-bg-elev: #141a2e;
+  --gb-surface: #171e35;
+  --gb-surface-2: #1e2742;
+  --gb-line: rgba(255, 255, 255, 0.08);
+  --gb-line-strong: rgba(255, 255, 255, 0.14);
+
+  --gb-text: #eef2ff;
+  --gb-text-dim: #a3aec9;
+  --gb-text-faint: #6b7896;
+
+  --gb-income: #34d399;
+  --gb-income-soft: rgba(52, 211, 153, 0.14);
+  --gb-expense: #fb7185;
+  --gb-expense-soft: rgba(251, 113, 133, 0.14);
+  --gb-accent: #818cf8;
+  --gb-on-accent: #0b1020;
+  --gb-warn: #fbbf24;
+
+  --gb-radius: 20px;
+  --gb-radius-sm: 14px;
+  --gb-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  --ion-background-color: var(--gb-bg);
+  --ion-background-color-rgb: 11, 16, 32;
+  --ion-text-color: var(--gb-text);
+  --ion-text-color-rgb: 238, 242, 255;
+
+  --ion-toolbar-background: var(--gb-bg);
+  --ion-toolbar-color: var(--gb-text);
+  --ion-tab-bar-background: rgba(11, 16, 32, 0.92);
+  --ion-tab-bar-color: var(--gb-text-faint);
+  --ion-tab-bar-color-selected: var(--gb-text);
+  --ion-item-background: transparent;
+  --ion-card-background: var(--gb-surface);
+  --ion-border-color: var(--gb-line);
+
+  --ion-color-primary: #818cf8;
+  --ion-color-primary-rgb: 129, 140, 248;
+  --ion-color-primary-contrast: #0b1020;
+  --ion-color-primary-contrast-rgb: 11, 16, 32;
+  --ion-color-primary-shade: #727ada;
+  --ion-color-primary-tint: #8e97f9;
+
+  --ion-color-success: #34d399;
+  --ion-color-success-rgb: 52, 211, 153;
+  --ion-color-danger: #fb7185;
+  --ion-color-danger-rgb: 251, 113, 133;
+  --ion-color-warning: #fbbf24;
+  --ion-color-medium: #6b7896;
+
+  --ion-font-family: Roboto, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* Tema claro: mismos roles, otros valores. Se activa con [data-theme="light"]. */
+:root[data-theme='light'] {
+  --gb-bg: #f4f6fb;
+  --gb-bg-elev: #ffffff;
+  --gb-surface: #ffffff;
+  --gb-surface-2: #eef1f8;
+  --gb-line: rgba(15, 23, 42, 0.08);
+  --gb-line-strong: rgba(15, 23, 42, 0.16);
+
+  --gb-text: #101728;
+  --gb-text-dim: #4d5a76;
+  --gb-text-faint: #7c89a3;
+
+  --gb-income: #059669;
+  --gb-income-soft: rgba(5, 150, 105, 0.12);
+  --gb-expense: #e11d48;
+  --gb-expense-soft: rgba(225, 29, 72, 0.12);
+  --gb-accent: #4f46e5;
+  --gb-on-accent: #ffffff;
+
+  --gb-shadow: 0 8px 24px rgba(16, 23, 40, 0.08);
+
+  --ion-background-color: var(--gb-bg);
+  --ion-background-color-rgb: 244, 246, 251;
+  --ion-text-color: var(--gb-text);
+  --ion-text-color-rgb: 16, 23, 40;
+  --ion-toolbar-background: var(--gb-bg);
+  --ion-tab-bar-background: rgba(255, 255, 255, 0.95);
+  --ion-card-background: var(--gb-surface);
+  --ion-color-primary: #4f46e5;
+  --ion-color-primary-rgb: 79, 70, 229;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-success: #059669;
+  --ion-color-danger: #e11d48;
+}

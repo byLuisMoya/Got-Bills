@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Los movimientos no salen del telefono: se excluyen del backup en la nube y
+  de la transferencia entre dispositivos. La copia se hace a mano desde
+  Ajustes > Exportar copia de seguridad.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+    </device-transfer>
+</data-extraction-rules>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Got Bills</string>
+    <string name="title_activity_main">Got Bills</string>
+    <string name="package_name">com.gotbills.app</string>
+    <string name="custom_url_scheme">com.gotbills.app</string>
+</resources>

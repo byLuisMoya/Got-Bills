@@ -1,0 +1,34 @@
+# Dependencias
+node_modules/
+.npm/
+
+# Build web
+dist/
+.vite/
+*.local
+
+# Capacitor / Android
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/captures/
+android/app/release/
+android/app/debug/
+*.apk
+*.aab
+*.keystore
+!debug.keystore
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.log
+npm-debug.log*
+
+# Firma de la APK — NUNCA se sube: haz copia aparte de estos dos
+android/keystore/
+android/keystore.properties

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#818CF8</color>
+    <color name="colorPrimaryDark">#0B1020</color>
+    <color name="colorAccent">#818CF8</color>
+    <!-- Fondo de la ventana nativa: el mismo azul noche que el WebView, para
+         que no aparezca un flash blanco entre el splash y la app. -->
+    <color name="gbBackground">#0B1020</color>
+</resources>
